@@ -11,7 +11,7 @@ const SendMoneyModal = ({ contact, onClose, onSend, refreshData }) => {
     const [show, setshow] = useState(false)
     console.log(contact.Id)
     const handleSend = async () => {
-        const response = await axios.post("http://localhost:3001/user/v1/send-money", {
+        const response = await axios.post("https://paytm-t9yo.onrender.com/user/v1/send-money", {
             senderid: contact.Id, sendmoney: amount
         }, {
             headers: {
@@ -111,17 +111,17 @@ const Dashboard = () => {
             setIsLoadingTransactions(true);
 
             const [usersResponse, balanceResponse, historyResponse] = await Promise.all([
-                axios.get("http://localhost:3001/user/v1/get-users", {
+                axios.get("https://paytm-t9yo.onrender.com/user/v1/get-users", {
                     headers: {
                         token: Cookies.get("jwt_token")
                     }
                 }),
-                axios.get("http://localhost:3001/user/v1/check-balance", {
+                axios.get("https://paytm-t9yo.onrender.com/user/v1/check-balance", {
                     headers: {
                         token: Cookies.get("jwt_token")
                     }
                 }),
-                axios.get("http://localhost:3001/user/v1/get-history", {
+                axios.get("https://paytm-t9yo.onrender.com/user/v1/get-history", {
                     headers: {
                         token: Cookies.get("jwt_token")
                     }

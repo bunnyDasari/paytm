@@ -9,7 +9,7 @@ function Signup() {
     const navigate = useNavigate()
     const onSubmitForm = async (e) => {
         e.preventDefault()
-        const response = await axois.post("http://localhost:3001/user/v1/signup", { username: username, password: pass })
+        const response = await axois.post("https://paytm-t9yo.onrender.com/user/v1/signup", { username: username, password: pass })
         console.log(response)
     }
     const onclicklogin = () => {
