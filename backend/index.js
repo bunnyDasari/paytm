@@ -15,5 +15,3 @@ function main() {
     })
 }
 main()
-4
-

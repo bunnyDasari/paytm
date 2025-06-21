@@ -165,12 +165,31 @@ userRoute.post("/send-money", middleware, async (req, res) => {
                 }
             })
         })
-
+        const senderMoney = await prisma.users.findFirst({
+            where: {
+                Id: user.token
+            }
+        })
+        const receiverMoney = await prisma.users.findFirst({
+            where: {
+                Id: senderid
+            }
+        })
+        await prisma.history.create({
+            data: {
+                userId: user.token,
+                moneysent: Number(sendmoney),
+                reciver: senderid,
+                sendername: senderMoney.username,
+                recivername: receiverMoney.username
+            }
+        })
         res.json({
             msg: "Money sent successfully",
             from: user.token,
             to: senderid,
-            amount: sendmoney
+            amount: sendmoney,
+
         })
     } catch (error) {
         console.error("Transaction error:", error)
@@ -201,11 +220,63 @@ userRoute.get("/check-balance", middleware, async (req, res) => {
     }
 
 })
+userRoute.get("/get-history", middleware, async (req, res) => {
+    try {
+        const token = req.headers.token
+        const user = jwt.verify(token, secKey)
 
+        // Get transactions where user is sender
+        const sentTransactions = await prisma.history.findMany({
+            where: {
+                userId: user.token
+            },
+            orderBy: {
+                id: 'desc'
+            }
+        });
 
+        // Get transactions where user is receiver
+        const receivedTransactions = await prisma.history.findMany({
+            where: {
+                reciver: user.token
+            },
+            orderBy: {
+                id: 'desc'
+            }
+        });
+
+        // Combine and sort all transactions
+        const allTransactions = [
+            ...sentTransactions.map(t => ({ ...t, type: 'sent' })),
+            ...receivedTransactions.map(t => ({ ...t, type: 'received' }))
+        ].sort((a, b) => b.id - a.id);
+
+        res.json({ history: allTransactions })
+    } catch (error) {
+        console.error("Error fetching history:", error)
+        res.status(500).json({
+            msg: "Failed to fetch history",
+            error: error.message
+        })
+    }
+})
+userRoute.get("/serach", async (req, res) => {
+    const { search } = req.query
+    const users = await prisma.users.findMany({
+        where: {
+            username: {
+                contains: search
+            }
+        },
+        select: {
+            Id: true,
+            username: true
+        }
+    })
+    res.json({ users })
+})
 userRoute.get("/get-users", middleware, async (req, res) => {
     const userlist = await prisma.users.findMany({})
     res.json({ userlist })
 })
-
 module.exports = { userRoute }

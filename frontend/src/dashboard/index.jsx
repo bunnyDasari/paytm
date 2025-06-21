@@ -4,7 +4,7 @@ import Cookies from "js-cookie"
 import { useActionData, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const SendMoneyModal = ({ contact, onClose, onSend }) => {
+const SendMoneyModal = ({ contact, onClose, onSend, refreshData }) => {
     const [amount, setAmount] = useState('');
     const [note, setNote] = useState('');
     const [money, setMoney] = useState("")
@@ -21,6 +21,12 @@ const SendMoneyModal = ({ contact, onClose, onSend }) => {
         setMoney(response.data.msg)
         setshow(!show)
         console.log(response.data)
+        // Call refreshData after successful transfer
+        refreshData();
+        // Close the modal after a short delay
+        setTimeout(() => {
+            onClose();
+        }, 1500);
     };
 
     return (
@@ -76,6 +82,10 @@ const Dashboard = () => {
     const [selectedContact, setSelectedContact] = useState(null);
     const [contacts, setContacts] = useState([])
     const [amout, setAmount] = useState("")
+    const [isLoadingBalance, setIsLoadingBalance] = useState(true);
+    const [isLoadingContacts, setIsLoadingContacts] = useState(true);
+    const [transactions, setTransactions] = useState([]);
+    const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
     const onclickLogin = () => {
         Cookies.remove("jwt_token")
         Cookies.remove("user")
@@ -94,25 +104,46 @@ const Dashboard = () => {
         setSelectedContact(contact)
         console.log(contact.Id)
     }
-    useEffect(() => {
-        const fetchusers = async () => {
-            const response = await axios.get("http://localhost:3001/user/v1/get-users", {
-                headers: {
-                    token: Cookies.get("jwt_token")
-                }
-            })
-            const amount = await axios.get("http://localhost:3001/user/v1/check-balance", {
-                headers: {
-                    token: Cookies.get("jwt_token")
-                }
-            })
-            console.log(amount.data)
-            setContacts(response.data.userlist)
-            setAmount(amount.data.Bal)
-            console.log(contacts)
+    const fetchData = async () => {
+        try {
+            setIsLoadingContacts(true);
+            setIsLoadingBalance(true);
+            setIsLoadingTransactions(true);
+
+            const [usersResponse, balanceResponse, historyResponse] = await Promise.all([
+                axios.get("http://localhost:3001/user/v1/get-users", {
+                    headers: {
+                        token: Cookies.get("jwt_token")
+                    }
+                }),
+                axios.get("http://localhost:3001/user/v1/check-balance", {
+                    headers: {
+                        token: Cookies.get("jwt_token")
+                    }
+                }),
+                axios.get("http://localhost:3001/user/v1/get-history", {
+                    headers: {
+                        token: Cookies.get("jwt_token")
+                    }
+                })
+            ]);
+
+            setContacts(usersResponse.data.userlist);
+            setAmount(balanceResponse.data.Bal);
+            setTransactions(historyResponse.data.history);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+            setIsLoadingContacts(false);
+            setIsLoadingBalance(false);
+            setIsLoadingTransactions(false);
         }
-        fetchusers()
+    }
+
+    useEffect(() => {
+        fetchData();
     }, [])
+
     return (
         <div className="dashboard-container">
             {/* Top Bar */}
@@ -145,7 +176,11 @@ const Dashboard = () => {
                     <div className="balance-header">
                         <div className="balance-info">
                             <h2>Available Balance</h2>
-                            <h1>{amout}</h1>
+                            {isLoadingBalance ? (
+                                <div className="loading-skeleton">Loading...</div>
+                            ) : (
+                                <h1>₹ {amout}</h1>
+                            )}
                         </div>
                         <div className="wallet-icon">💳</div>
                     </div>
@@ -176,22 +211,30 @@ const Dashboard = () => {
                         <span className="search-icon">🔍</span>
                     </div>
                     <div className="contacts-grid">
-                        {contacts.map(contact => (
-                            <div key={contact.id} className="contact-card">
-                                <div className="profile-icon">{contact.username[0]}</div>
-                                <div className="contact-info">
-                                    <h4>{contact.username}</h4>
-                                    {/* <p>{contact.phone}</p> */}
+                        {isLoadingContacts ? (
+                            // Loading skeleton for contacts
+                            Array(4).fill().map((_, index) => (
+                                <div key={index} className="contact-card loading">
+                                    <div className="loading-skeleton">Loading...</div>
                                 </div>
-                                <button
-                                    className="send-money-btn"
-                                    onClick={() => onCLickSendmoney(contact)}
-                                >
-                                    <span className="send-icon">↗️</span>
-                                    Send
-                                </button>
-                            </div>
-                        ))}
+                            ))
+                        ) : (
+                            contacts.map(contact => (
+                                <div key={contact.id} className="contact-card">
+                                    <div className="profile-icon">{contact.username[0]}</div>
+                                    <div className="contact-info">
+                                        <h4>{contact.username}</h4>
+                                    </div>
+                                    <button
+                                        className="send-money-btn"
+                                        onClick={() => onCLickSendmoney(contact)}
+                                    >
+                                        <span className="send-icon">↗️</span>
+                                        Send
+                                    </button>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 
@@ -272,30 +315,43 @@ const Dashboard = () => {
                         <button className="view-all">View All</button>
                     </div>
                     <div className="transactions-list">
-                        <div className="transaction-item">
-                            <div className="transaction-icon grocery">🛒</div>
-                            <div className="transaction-details">
-                                <h4>Grocery Store</h4>
-                                <p>Today, 2:30 PM</p>
+                        {isLoadingTransactions ? (
+                            // Loading skeleton for transactions
+                            Array(3).fill().map((_, index) => (
+                                <div key={index} className="transaction-item loading">
+                                    <div className="loading-skeleton" style={{ width: '50px', height: '50px', borderRadius: '15px' }}></div>
+                                    <div className="transaction-details" style={{ flex: 1, marginLeft: '20px' }}>
+                                        <div className="loading-skeleton" style={{ width: '60%', height: '20px' }}></div>
+                                        <div className="loading-skeleton" style={{ width: '40%', height: '16px', marginTop: '6px' }}></div>
+                                    </div>
+                                    <div className="loading-skeleton" style={{ width: '80px', height: '24px' }}></div>
+                                </div>
+                            ))
+                        ) : transactions.length > 0 ? (
+                            transactions.map((transaction) => (
+                                <div key={transaction.id} className="transaction-item">
+                                    <div className={`transaction-icon ${transaction.type === 'sent' ? 'money-transfer' : 'money-received'}`}>
+                                        {transaction.type === 'sent' ? '💸' : '💰'}
+                                    </div>
+                                    <div className="transaction-details">
+                                        <h4>
+                                            {transaction.type === 'sent'
+                                                ? `Sent to ${transaction.recivername}`
+                                                : `Received from ${transaction.sendername}`
+                                            }
+                                        </h4>
+                                        <p>Amount: ₹{transaction.moneysent}</p>
+                                    </div>
+                                    <div className={`transaction-amount ${transaction.type === 'sent' ? 'debit' : 'credit'}`}>
+                                        {transaction.type === 'sent' ? '-' : '+'}₹{transaction.moneysent}
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="no-transactions">
+                                <p>No transactions yet</p>
                             </div>
-                            <div className="transaction-amount debit">-₹1,200</div>
-                        </div>
-                        <div className="transaction-item">
-                            <div className="transaction-icon salary">💰</div>
-                            <div className="transaction-details">
-                                <h4>Salary Credit</h4>
-                                <p>Yesterday, 10:00 AM</p>
-                            </div>
-                            <div className="transaction-amount credit">+₹45,000</div>
-                        </div>
-                        <div className="transaction-item">
-                            <div className="transaction-icon recharge">📱</div>
-                            <div className="transaction-details">
-                                <h4>Mobile Recharge</h4>
-                                <p>Yesterday, 9:15 AM</p>
-                            </div>
-                            <div className="transaction-amount debit">-₹499</div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </main>
@@ -306,6 +362,7 @@ const Dashboard = () => {
                     contact={selectedContact}
                     onClose={() => setSelectedContact(null)}
                     onSend={handleSendMoney}
+                    refreshData={fetchData}
                 />
             )}
         </div>

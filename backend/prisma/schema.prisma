@@ -23,3 +23,12 @@ model bank {
   userId      Int @id
   bankBalance Int
 }
+
+model history {
+  id          Int     @id @default(autoincrement())
+  userId      Int
+  moneysent   Int
+  reciver     Int
+  sendername  String?
+  recivername String?
+}

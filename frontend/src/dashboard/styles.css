@@ -24,6 +24,8 @@
     position: sticky;
     top: 0;
     z-index: 100;
+    border-radius: 20px;
+
 }
 
 .location {
@@ -386,6 +388,39 @@
     font-size: 18px;
 }
 
+.transaction-icon.money-transfer {
+    background: linear-gradient(135deg, #ff6b6b, #ff8787);
+    color: white;
+}
+
+.transaction-icon.money-received {
+    background: linear-gradient(135deg, #51cf66, #69db7c);
+    color: white;
+}
+
+.transaction-amount.credit {
+    color: #51cf66;
+}
+
+.transaction-amount.debit {
+    color: #ff6b6b;
+}
+
+.no-transactions {
+    text-align: center;
+    padding: 30px;
+    color: #666;
+    font-size: 16px;
+}
+
+.transaction-item.loading {
+    opacity: 0.7;
+}
+
+.transaction-item.loading .loading-skeleton {
+    margin: 0;
+}
+
 /* Bottom Navigation */
 .bottom-nav {
     position: fixed;
@@ -447,33 +482,39 @@
     font-size: 18px;
 }
 
-/* Responsive Design */
+/* Responsive Styles */
 @media (max-width: 1400px) {
     .main-content {
         padding: 30px;
+        gap: 20px;
     }
 
     .balance-info h1 {
-        font-size: 40px;
+        font-size: 42px;
     }
 
     .service-icon {
         width: 60px;
         height: 60px;
     }
+
+    .services-grid {
+        gap: 20px;
+    }
 }
 
 @media (max-width: 1200px) {
     .main-content {
         grid-template-columns: 1fr;
+        padding: 25px;
     }
 
     .services-section {
-        grid-column: 1 / -1;
+        padding: 25px;
     }
 
     .top-bar {
-        padding: 15px 30px;
+        padding: 15px 25px;
     }
 
     .profile-name {
@@ -489,26 +530,31 @@
     }
 
     .signout-btn {
-        padding: 10px;
+        padding: 8px;
+    }
+
+    .services-grid {
+        grid-template-columns: repeat(4, 1fr);
     }
 }
 
 @media (max-width: 768px) {
     .main-content {
         padding: 20px;
+        gap: 15px;
     }
 
     .balance-card {
-        padding: 30px;
+        padding: 25px;
     }
 
     .balance-info h1 {
-        font-size: 32px;
+        font-size: 36px;
     }
 
     .services-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
     }
 
     .top-bar {
@@ -520,7 +566,55 @@
     }
 
     .scan-btn {
-        padding: 10px;
+        padding: 8px;
+    }
+
+    .contacts-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .contact-card {
+        padding: 15px;
+    }
+
+    .contact-avatar {
+        width: 45px;
+        height: 45px;
+    }
+
+    .contact-info h4 {
+        font-size: 14px;
+    }
+
+    .contact-info p {
+        font-size: 12px;
+    }
+
+    .send-money-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .transaction-item {
+        padding: 12px;
+    }
+
+    .transaction-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .transaction-details h4 {
+        font-size: 14px;
+    }
+
+    .transaction-details p {
+        font-size: 12px;
+    }
+
+    .transaction-amount {
+        font-size: 14px;
     }
 }
 
@@ -530,8 +624,8 @@
     }
 
     .services-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 15px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
     }
 
     .service-icon {
@@ -541,19 +635,116 @@
 
     .balance-actions {
         flex-direction: column;
+        gap: 10px;
     }
 
     .action-btn {
-        width: 100%;
+        padding: 12px;
     }
 
     .offer-card {
-        flex-direction: column;
+        padding: 15px;
     }
 
     .offer-image {
-        margin: 20px 0 0 0;
-        text-align: center;
+        display: none;
+    }
+
+    .contacts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .send-money-modal {
+        width: 90%;
+        max-width: none;
+    }
+
+    .modal-header h3 {
+        font-size: 18px;
+    }
+
+    .amount-input input {
+        font-size: 24px;
+    }
+
+    .currency-symbol {
+        font-size: 24px;
+    }
+
+    .send-confirm-btn {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .top-bar {
+        padding: 10px 15px;
+    }
+
+    .location span:not(.location-icon) {
+        display: none;
+    }
+
+    .notification-bell {
+        font-size: 20px;
+    }
+}
+
+/* Add smooth transitions for responsive changes */
+.main-content,
+.services-grid,
+.contacts-grid,
+.balance-card,
+.top-bar,
+.profile-section,
+.scan-btn,
+.signout-btn,
+.transaction-item {
+    transition: all 0.3s ease;
+}
+
+/* Improve touch targets for mobile */
+@media (max-width: 768px) {
+
+    .action-btn,
+    .service-item,
+    .contact-card,
+    .transaction-item,
+    .view-all,
+    .offer-btn {
+        min-height: 44px;
+    }
+
+    input,
+    button,
+    .profile-section,
+    .scan-btn,
+    .signout-btn {
+        min-height: 44px;
+    }
+}
+
+/* Improve modal responsiveness */
+@media (max-width: 480px) {
+    .modal-overlay {
+        padding: 10px;
+    }
+
+    .send-money-modal {
+        margin: 0;
+        border-radius: 15px;
+    }
+
+    .modal-content {
+        padding: 15px;
+    }
+
+    .contact-info-modal {
+        padding: 10px;
+    }
+
+    .amount-input,
+    .note-input {
+        margin: 10px 0;
     }
 }
 
@@ -579,6 +770,7 @@
     font-size: 14px;
     background: #f8f8f8;
     transition: all 0.3s ease;
+    color: black;
 }
 
 .contacts-search input:focus {
@@ -671,36 +863,6 @@
 
 .send-icon {
     font-size: 16px;
-}
-
-/* Responsive adjustments for contacts section */
-@media (max-width: 768px) {
-    .contacts-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .contact-card {
-        padding: 12px;
-    }
-
-    .contact-avatar {
-        width: 40px;
-        height: 40px;
-        font-size: 14px;
-    }
-
-    .contact-info h4 {
-        font-size: 14px;
-    }
-
-    .contact-info p {
-        font-size: 12px;
-    }
-
-    .send-money-btn {
-        padding: 6px 12px;
-        font-size: 13px;
-    }
 }
 
 /* Send Money Modal */
@@ -876,27 +1038,31 @@
     cursor: not-allowed;
 }
 
-/* Responsive adjustments for modal */
-@media (max-width: 480px) {
-    .send-money-modal {
-        width: 95%;
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 4px;
+    height: 20px;
+    margin: 8px 0;
+    width: 100%;
+}
+
+.contact-card.loading {
+    background: #f8f8f8;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
     }
 
-    .modal-header h3 {
-        font-size: 16px;
-    }
-
-    .amount-input input {
-        font-size: 20px;
-        padding: 12px 12px 12px 35px;
-    }
-
-    .currency-symbol {
-        font-size: 18px;
-    }
-
-    .send-confirm-btn {
-        padding: 12px;
-        font-size: 15px;
+    100% {
+        background-position: -200% 0;
     }
 }
