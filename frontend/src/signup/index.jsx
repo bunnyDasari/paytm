@@ -5,16 +5,15 @@ import { useNavigate } from 'react-router-dom'
 function Signup() {
     const [username, setUsername] = useState("")
     const [pass, setPass] = useState("")
-
+    const [loginShow, setLoginShow] = useState(false)
     const navigate = useNavigate()
     const onSubmitForm = async (e) => {
         e.preventDefault()
         const response = await axois.post("https://paytm-t9yo.onrender.com/user/v1/signup", { username: username, password: pass })
         console.log(response)
+        setLoginShow(!loginShow)
     }
-    const onclicklogin = () => {
-        navigate("/login")
-    }
+
     return (
         <div className="signup-container">
             <div className="signup-card">
@@ -51,11 +50,12 @@ function Signup() {
                         Create Account
                     </button>
                 </form>
+                {loginShow && <p>Login Now!!</p>}
 
                 <div className="signup-footer">
                     <p>
                         Already have an account?{' '}
-                        <a href="/login" className="login-link" onClick={onclicklogin}>
+                        <a href="/" className="login-link" >
                             Login here
                         </a>
                     </p>

@@ -89,7 +89,7 @@ const Dashboard = () => {
     const onclickLogin = () => {
         Cookies.remove("jwt_token")
         Cookies.remove("user")
-        nav("/login")
+        nav("/")
     }
 
     const handleSendMoney = (contact, amount, note) => {
